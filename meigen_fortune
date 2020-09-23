@@ -1,0 +1,45 @@
+#!/bin/python3
+
+import argparse
+import os
+import random
+
+import yaml
+
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "-n", "--no-color",
+    help="Show meigen without color.",
+    action="store_false",
+    dest="color"
+)
+parser.add_argument(
+    "file",
+    help="The file to read meigen.", nargs="*",
+    default=os.environ["BLINTOOL_DIRECTORY"] + "/local_data/meigen.yaml"
+)
+
+args = parser.parse_args()
+
+MEIGEN_TEMPLATE = {
+    "content": {
+        True: "\033[38;5;229;1m   {0}\033[m",
+        False: "{0}"
+    },
+    "prop": {
+        True: "\033[38;5;250m               --- {0} (#{1})\033[m",
+        False: "               --- {0} (#{1})"
+    }
+}
+
+if __name__ == '__main__':
+    with open(args.file) as f:
+        meigen_db = yaml.load(f.read(), yaml.FullLoader)
+
+    meigen = meigen_db[random.randint(0, len(meigen_db) - 1)]
+    print(MEIGEN_TEMPLATE["content"][args.color].format(
+        meigen["content"].replace("\n", "\n   ")
+    ))
+    print(MEIGEN_TEMPLATE["prop"][args.color].format(
+        meigen["author"], meigen["id"]
+    ))
