@@ -1,45 +1,49 @@
 #!/bin/python3
 
-import argparse
 import os
 import random
 
 import yaml
 
-parser = argparse.ArgumentParser()
-parser.add_argument(
-    "-n", "--no-color",
-    help="Show meigen without color.",
-    action="store_false",
-    dest="color"
-)
-parser.add_argument(
-    "file",
-    help="The file to read meigen.", nargs="*",
-    default=os.environ["BLINTOOL_DIRECTORY"] + "/local_data/meigen.yaml"
-)
-
-args = parser.parse_args()
+from scripts.lib import args
 
 MEIGEN_TEMPLATE = {
     "content": {
-        True: "\033[38;5;229;1m   {0}\033[m",
-        False: "{0}"
+        False: "\033[38;5;229;1m   {0}\033[m",
+        True: "{0}"
     },
     "prop": {
-        True: "\033[38;5;250m               --- {0} (#{1})\033[m",
-        False: "               --- {0} (#{1})"
+        False: "\033[38;5;250m               --- {0} (#{1})\033[m",
+        True: "               --- {0} (#{1})"
     }
 }
 
+DEFAULT_FILE_PATH = \
+    os.environ["BLINTOOL_DIRECTORY"] + \
+    "/local_data/meigen.yaml"
+
+argument: args.ArgParser = args.ArgParser(
+    name="meigen_fortune",
+    args=[
+        args.FlagArgs(
+            "no-color", "Show meigen without color.",
+            dest="color"
+        ),
+        args.PositionalArgs(
+            "file", "The file to read meigen.",
+            required=False
+        )
+    ]
+)
+
 if __name__ == '__main__':
-    with open(args.file) as f:
+    with open(argument.get_or("file", DEFAULT_FILE_PATH)) as f:
         meigen_db = yaml.load(f.read(), yaml.FullLoader)
 
     meigen = meigen_db[random.randint(0, len(meigen_db) - 1)]
-    print(MEIGEN_TEMPLATE["content"][args.color].format(
+    print(MEIGEN_TEMPLATE["content"][argument.get_or("color", False)].format(
         meigen["content"].replace("\n", "\n   ")
     ))
-    print(MEIGEN_TEMPLATE["prop"][args.color].format(
+    print(MEIGEN_TEMPLATE["prop"][argument.get_or("color", False)].format(
         meigen["author"], meigen["id"]
     ))
