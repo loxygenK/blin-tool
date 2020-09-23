@@ -1,0 +1,3 @@
+#!/bin/sh
+
+WINEARCH=win32 WINEPREFIX=~/.wine_pfxs/aviutl wine ~/.wine_pfxs/data_drive/BouyomiChan_0_1_11_0_Beta20/BouyomiChan.exe

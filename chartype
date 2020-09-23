@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cd ~/.blin-tool
+python3 scripts/chartype.py $@

@@ -1,0 +1,3 @@
+#!/bin/sh
+
+WINEARCH=win32 WINEPREFIX=~/.wine_pfxs/aviutl wine ~/.wine_pfxs/data_drive/aviutl110/aviutl.exe
