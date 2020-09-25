@@ -25,7 +25,7 @@ commit_info=$(git log -1 --date=format:"%m/%d %H:%M" --pretty='\e[38;5;80m%s\e[m
 branch_name=$(git symbolic-ref --short HEAD)
 
 branch_color_code=$([ $branch_name = "master" -o $branch_name = "main" ] && echo "148" || echo "80")
-working_tree_status=$([ $(git diff --name-only) != "" ] && echo "\e[38;5;210m(Uncommited)\e[m" || : )
+working_tree_status=$([ "$(git status -s)" != "" ] && echo "\e[38;5;210m(Uncommited)\e[m" || : )
 
 echo -e "    Latest Commit: $commit_info"
 echo -e "   Current Branch: \e[38;5;$branch_color_code;1m$branch_name\e[m $working_tree_status"
