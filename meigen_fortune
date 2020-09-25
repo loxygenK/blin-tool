@@ -11,7 +11,7 @@ from scripts.lib import args
 
 MEIGEN_TEMPLATE = {
     "content": {
-        False: "\033[38;5;229;1m   {0}\033[m",
+        False: "\033[38;5;229;1m{0}\033[m",
         True: "{0}"
     },
     "prop": {
@@ -68,7 +68,7 @@ if __name__ == '__main__':
     )[0]
 
     print(MEIGEN_TEMPLATE["content"][argument.get_or("color", False)].format(
-        meigen["content"].replace("\n", "\n   ")
+        meigen["content"]
     ))
     print(MEIGEN_TEMPLATE["prop"][argument.get_or("color", False)].format(
         meigen["author"], meigen["id"]
