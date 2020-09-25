@@ -24,52 +24,70 @@ DEFAULT_FILE_PATH = \
     os.environ["BLINTOOL_DIRECTORY"] + \
     "/local_data/meigen.yaml"
 
-argument: args.ArgParser = args.ArgParser(
-    name="meigen_fortune",
-    args=[
-        args.FlagArgs(
-            "no-color", "Show meigen without color.",
-            dest="color"
-        ),
-        args.OptionContentArgs(
-            "file", "The file to read meigen.",
-        ),
-        args.PositionalArgs(
-            "id", "The ID of the meigen you want to see.",
-            required=False
-        ),
-    ]
-)
+ARGUMENTS_LIST = [
+    args.FlagArgs(
+        "no-color", "Show meigen without color.",
+        dest="color"
+    ),
+    args.OptionContentArgs(
+        "file", "The file to read meigen.",
+    ),
+    args.PositionalArgs(
+        "id", "The ID of the meigen you want to see.",
+        required=False
+    ),
+]
 
-if __name__ == '__main__':
+
+def assert_error(condition: bool, error_message: str, exit_code: int = 1):
+    if not condition:
+        print("[!] {0}".format(error_message))
+        sys.exit(exit_code)
+
+
+def main():
+    # Parse arguments
+    argument: args.ArgParser = args.ArgParser(
+        name="meigen_fortune",
+        args=ARGUMENTS_LIST
+    )
+
+    # Load the meigen database
     file_path = argument.get_or("file", DEFAULT_FILE_PATH)
-    if not os.path.exists(file_path):
-        print("[!] Meigen Database File not found: {0}".format(file_path))
-        sys.exit(1)
-
-    with open(argument.get_or("file", DEFAULT_FILE_PATH)) as f:
+    assert_error(
+        os.path.exists(file_path),
+        "Meigen Database File not found: {0}".format(file_path)
+    )
+    with open(file_path) as f:
         meigen_db = yaml.load(f.read(), yaml.FullLoader)
 
+    # Fetch the meigen
     meigen_id_list = list(map(lambda x: x["id"], meigen_db))
     raw_meigen_id = argument.get_or(
         "id", str(random.choice(meigen_id_list))
     )
 
-    if re.match("-?[0-9]+", raw_meigen_id) is None:
-        print("[!] The Meigen ID seems not valid number.")
-        sys.exit(1)
-
-    if int(raw_meigen_id) not in meigen_id_list:
-        print("[!] Meigen #{0} not found.".format(raw_meigen_id))
-        sys.exit(1)
+    assert_error(
+        re.match("-?[0-9]+", raw_meigen_id) is not None,
+        "The Meigen ID seems not valid number."
+    )
+    assert_error(
+        int(raw_meigen_id) in meigen_id_list,
+        "Meigen #{0} not found.".format(raw_meigen_id)
+    )
 
     meigen = list(
         filter(lambda x: x["id"] == int(raw_meigen_id), meigen_db)
     )[0]
 
+    # print the meigen
     print(MEIGEN_TEMPLATE["content"][argument.get_or("color", False)].format(
         meigen["content"]
     ))
     print(MEIGEN_TEMPLATE["prop"][argument.get_or("color", False)].format(
         meigen["author"], meigen["id"]
     ))
+
+
+if __name__ == '__main__':
+    main()
