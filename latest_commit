@@ -1,0 +1,31 @@
+#! /bin/bash
+
+if [ $# -gt 1 ]; then
+	echo "Usage: latest_commit [repo]"
+	exit 1
+fi
+
+repo_path="${1-$(pwd)}"
+
+echo -e "\e[1m$repo_path\e[m:"
+
+if [ ! -e $repo_path ]; then
+	echo "  [!] Directory not found."
+	exit 2
+fi
+
+if [ ! -e $repo_path"/.git" ]; then
+	echo "  [!] The directory is not git repository."
+	exit 3
+fi
+
+cd $repo_path
+
+commit_info=$(git log -1 --date=format:"%m/%d %H:%M" --pretty='\e[38;5;80m%s\e[m\e[38;5;243m<%h>\e[m (%cd)')
+branch_name=$(git symbolic-ref --short HEAD)
+
+branch_color_code=$([ $branch_name = "master" -o $branch_name = "main" ] && echo "148" || echo "80")
+working_tree_status=$([ "$(git status -s)" != "" ] && echo "\e[38;5;210m(Uncommited)\e[m" || : )
+
+echo -e "    Latest Commit: $commit_info"
+echo -e "   Current Branch: \e[38;5;$branch_color_code;1m$branch_name\e[m $working_tree_status"
