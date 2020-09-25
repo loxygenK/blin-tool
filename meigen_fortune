@@ -2,6 +2,8 @@
 
 import os
 import random
+import re
+import sys
 
 import yaml
 
@@ -29,6 +31,9 @@ argument: args.ArgParser = args.ArgParser(
             "no-color", "Show meigen without color.",
             dest="color"
         ),
+        args.OptionContentArgs(
+            "id", "The ID of the meigen you want to see.",
+        ),
         args.PositionalArgs(
             "file", "The file to read meigen.",
             required=False
@@ -40,7 +45,25 @@ if __name__ == '__main__':
     with open(argument.get_or("file", DEFAULT_FILE_PATH)) as f:
         meigen_db = yaml.load(f.read(), yaml.FullLoader)
 
-    meigen = meigen_db[random.randint(0, len(meigen_db) - 1)]
+    raw_meigen_id = argument.get_or(
+        "id", str(random.randint(0, len(meigen_db) - 1))
+    )
+
+    if re.match("-?[0-9]+", raw_meigen_id) is None:
+        print("[!] The Meigen ID seems not valid number.")
+        sys.exit(1)
+
+    meigen_id = int(raw_meigen_id)
+
+    if not (1 <= meigen_id < len(meigen_db)):
+        print(
+            "[!] The Meigen ID is not in valid range(0 to {0}).".format(
+                len(meigen_db)
+            )
+        )
+        sys.exit(2)
+
+    meigen = meigen_db[meigen_id - 1]
     print(MEIGEN_TEMPLATE["content"][argument.get_or("color", False)].format(
         meigen["content"].replace("\n", "\n   ")
     ))
