@@ -42,6 +42,11 @@ argument: args.ArgParser = args.ArgParser(
 )
 
 if __name__ == '__main__':
+    file_path = argument.get_or("file", DEFAULT_FILE_PATH)
+    if not os.path.exists(file_path):
+        print("[!] Meigen Database File not found: {0}".format(file_path))
+        sys.exit(1)
+
     with open(argument.get_or("file", DEFAULT_FILE_PATH)) as f:
         meigen_db = yaml.load(f.read(), yaml.FullLoader)
 
