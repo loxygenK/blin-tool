@@ -18,5 +18,5 @@ if [ ! -e $1"/.git" ]; then
 fi
 
 cd $1
-echo -e "    Latest Commit: $(git log -1 --date=format:"%H:%M" --pretty='\e[38;5;80m%s\e[m\e[38;5;243m<%h>\e[m (%cd)')"
+echo -e "    Latest Commit: $(git log -1 --date=format:"%m/%d %H:%M" --pretty='\e[38;5;80m%s\e[m\e[38;5;243m<%h>\e[m (%cd)')"
 echo -e "   Current Branch: \e[38;5;80;1m$(git symbolic-ref --short HEAD)\e[m"
