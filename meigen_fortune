@@ -1,0 +1,93 @@
+#!/bin/python3
+
+import os
+import random
+import re
+import sys
+
+import yaml
+
+from scripts.lib import args
+
+MEIGEN_TEMPLATE = {
+    "content": {
+        False: "\033[38;5;229;1m{0}\033[m",
+        True: "{0}"
+    },
+    "prop": {
+        False: "\033[38;5;250m               --- {0} (#{1})\033[m",
+        True: "               --- {0} (#{1})"
+    }
+}
+
+DEFAULT_FILE_PATH = \
+    os.environ["BLINTOOL_DIRECTORY"] + \
+    "/local_data/meigen.yaml"
+
+ARGUMENTS_LIST = [
+    args.FlagArgs(
+        "no-color", "Show meigen without color.",
+        dest="color"
+    ),
+    args.OptionContentArgs(
+        "file", "The file to read meigen.",
+    ),
+    args.PositionalArgs(
+        "id", "The ID of the meigen you want to see.",
+        required=False
+    ),
+]
+
+
+def assert_error(condition: bool, error_message: str, exit_code: int = 1):
+    if not condition:
+        print("[!] {0}".format(error_message))
+        sys.exit(exit_code)
+
+
+def main():
+    # Parse arguments
+    argument: args.ArgParser = args.ArgParser(
+        name="meigen_fortune",
+        args=ARGUMENTS_LIST
+    )
+
+    # Load the meigen database
+    file_path = argument.get_or("file", DEFAULT_FILE_PATH)
+    assert_error(
+        os.path.exists(file_path),
+        "Meigen Database File not found: {0}".format(file_path)
+    )
+    with open(file_path) as f:
+        meigen_db = yaml.load(f.read(), yaml.FullLoader)
+
+    # Fetch the meigen
+    meigen_id_list = list(map(lambda x: x["id"], meigen_db))
+    raw_meigen_id = argument.get_or(
+        "id", str(random.choice(meigen_id_list))
+    )
+
+    assert_error(
+        re.match("-?[0-9]+", raw_meigen_id) is not None,
+        "The Meigen ID seems not valid number."
+    )
+    assert_error(
+        int(raw_meigen_id) in meigen_id_list,
+        "Meigen #{0} not found.".format(raw_meigen_id)
+    )
+
+    meigen = list(
+        filter(lambda x: x["id"] == int(raw_meigen_id), meigen_db)
+    )[0]
+
+    # print the meigen
+    print(MEIGEN_TEMPLATE["content"][argument.get_or("color", False)].format(
+        meigen["content"]
+    ))
+    print(MEIGEN_TEMPLATE["prop"][argument.get_or("color", False)].format(
+        meigen["author"], meigen["id"]
+    ))
+
+
+if __name__ == '__main__':
+    main()

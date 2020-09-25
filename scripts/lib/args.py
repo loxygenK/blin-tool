@@ -24,7 +24,7 @@ class PositionalArgs(Args):
             nargs = "+"
         if not self.required:
             nargs = "*"
-        if (not self.limitted) and self.limitted:
+        if (not self.required) and self.limitted:
             nargs = "?"
 
         parser.add_argument(
@@ -97,7 +97,7 @@ class FlagArgs(OptionArgs):
         parser.add_argument(
             self.short_name, self.long_name,
             required=self.required,
-            help=self.help,
+            help=self.help, dest=self.dest,
             action="store_true"
         )
 
@@ -117,5 +117,5 @@ class ArgParser(dict):
     def __getitem__(self, k: str) -> str:
         return eval("self.parsed_args." + k)
 
-    def get_or(self, k: str, default: str) -> str:
+    def get_or(self, k: str, default) -> str:
         return self[k] if self[k] is not None else default
