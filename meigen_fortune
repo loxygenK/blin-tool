@@ -32,12 +32,12 @@ argument: args.ArgParser = args.ArgParser(
             dest="color"
         ),
         args.OptionContentArgs(
-            "id", "The ID of the meigen you want to see.",
+            "file", "The file to read meigen.",
         ),
         args.PositionalArgs(
-            "file", "The file to read meigen.",
+            "id", "The ID of the meigen you want to see.",
             required=False
-        )
+        ),
     ]
 )
 
